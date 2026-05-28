@@ -1,0 +1,76 @@
+{
+  "expo": {
+    "owner": "foreverchoi",
+    "name": "face-mosaic",
+    "slug": "face-mosaic",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "face-mosaic",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.foreverchoi0706.weslit",
+      "infoPlist": {
+        "NSCameraUsageDescription": "얼굴 모자이크 처리를 위해 카메라 접근이 필요합니다.",
+        "NSMicrophoneUsageDescription": "동영상 녹화 시 오디오 녹음을 위해 마이크 접근이 필요합니다.",
+        "NSPhotoLibraryUsageDescription": "모자이크 처리된 사진을 저장하기 위해 사진 접근이 필요합니다.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#131313"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.foreverchoi0706.weslit",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "얼굴 모자이크 처리를 위해 카메라 접근이 필요합니다.",
+          "enableFrameProcessors": true
+        }
+      ],
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "모자이크 처리할 사진을 선택하기 위해 접근이 필요합니다."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8454a280-7031-4de6-b56d-afafd8b2e856"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8454a280-7031-4de6-b56d-afafd8b2e856"
+      }
+    }
+  }
+}
