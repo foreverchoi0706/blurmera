@@ -413,3 +413,4 @@ export async function applyMosaicToImage(
 2. **Android 추가 설정** — `android/app/build.gradle`에 `enableHermes: true` 확인 필요.
 3. **App Store 심사** — 얼굴 인식 관련 사용 목적을 Privacy Manifest에 명시해야 함. `NSFaceIDUsageDescription` 불필요 (FaceID 아님), 대신 `NSCameraUsageDescription` 상세 기재.
 4. **얼굴 데이터** — `vision-camera-face-detector`는 좌표값만 반환하고 얼굴 이미지 자체를 저장하지 않음. 개인정보처리방침에 "얼굴 데이터 미수집" 명시 가능.# blurmera
+# blurmera
