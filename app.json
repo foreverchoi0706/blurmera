@@ -11,7 +11,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.foreverchoi0706.weslit",
+      "bundleIdentifier": "com.foreverchoi0706.blurema",
       "infoPlist": {
         "NSCameraUsageDescription": "얼굴 모자이크 처리를 위해 카메라 접근이 필요합니다.",
         "NSMicrophoneUsageDescription": "동영상 녹화 시 오디오 녹음을 위해 마이크 접근이 필요합니다.",
@@ -22,10 +22,10 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
-        "backgroundColor": "#131313"
+        "backgroundColor": "#0E0E0E"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.foreverchoi0706.weslit",
+      "package": "com.foreverchoi0706.blurema",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
@@ -34,6 +34,14 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0E0E0E",
+          "image": "./assets/images/splash.png",
+          "imageWidth": 200
+        }
+      ],
       [
         "react-native-vision-camera",
         {
