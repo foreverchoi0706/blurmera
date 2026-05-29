@@ -9,6 +9,7 @@ import {
   useMicrophonePermission,
 } from "react-native-vision-camera";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import * as Sharing from "expo-sharing";
 import { File, Paths } from "expo-file-system";
@@ -20,6 +21,7 @@ import { ExclusionLayer, type ExclusionRect } from "./ExclusionLayer";
 import PermissionPrompt from "./PermissionPrompt";
 import OnboardingOverlay from "./OnboardingOverlay";
 import { useFaceDetection } from "@/hooks/useFaceDetection";
+import { colors, gradient } from "@/constants/theme";
 
 // 온보딩 1회 노출 플래그 (AsyncStorage 미설치 → expo-file-system 사용)
 const onboardingFlag = () => new File(Paths.document, "onboarding_v1.flag");
@@ -351,71 +353,74 @@ export function MosaicCamera() {
         </View>
       </GestureDetector>
 
-      {/* 좌측 상단: 플래시 · 카메라 전환 */}
-      <SafeAreaView
-        style={styles.topBarLeft}
-        edges={["top"]}
-        pointerEvents="box-none"
-      >
-        <TouchableOpacity
-          style={styles.flashPill}
-          onPress={cycleFlash}
-          activeOpacity={0.8}
-          hitSlop={8}
-        >
-          <Ionicons
-            name={flashIcon}
-            size={16}
-            color={flash === "off" ? "#fff" : "#FFD60A"}
-          />
-          <Text
-            style={[styles.flashLabel, flash !== "off" && styles.flashLabelOn]}
-          >
-            {flashLabel}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconBtn}
-          onPress={flipCamera}
-          activeOpacity={0.8}
-          hitSlop={8}
-        >
-          <Ionicons name="camera-reverse-outline" size={20} color="#fff" />
-        </TouchableOpacity>
-      </SafeAreaView>
-
+      {/* 상단 바: 좌측(플래시·전환) / 우측(타이머·그리드) */}
       <SafeAreaView
         style={styles.topBar}
         edges={["top"]}
         pointerEvents="box-none"
       >
-        <TouchableOpacity
-          style={[styles.flashPill, timer > 0 && styles.iconBtnActive]}
-          onPress={cycleTimer}
-          activeOpacity={0.8}
-          hitSlop={8}
-        >
-          <Ionicons
-            name="timer-outline"
-            size={16}
-            color={timer > 0 ? "#34D399" : "#fff"}
-          />
-          <Text style={[styles.flashLabel, timer > 0 && { color: "#34D399" }]}>
-            {timer === 0 ? "끔" : `${timer}초`}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.iconBtn, gridOn && styles.iconBtnActive]}
-          onPress={() => setGridOn((g) => !g)}
-          activeOpacity={0.8}
-          hitSlop={8}
-        >
-          <Ionicons
-            name="grid-outline"
-            size={18}
-            color={gridOn ? "#34D399" : "#fff"}
-          />
-        </TouchableOpacity>
+        <View style={styles.topGroup}>
+          <TouchableOpacity
+            style={styles.pill}
+            onPress={cycleFlash}
+            activeOpacity={0.8}
+            hitSlop={8}
+          >
+            <Ionicons
+              name={flashIcon}
+              size={16}
+              color={flash === "off" ? "#fff" : "#FFD60A"}
+            />
+            <Text
+              style={[
+                styles.pillLabel,
+                flash !== "off" && styles.pillLabelFlash,
+              ]}
+            >
+              {flashLabel}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.iconBtn}
+            onPress={flipCamera}
+            activeOpacity={0.8}
+            hitSlop={8}
+          >
+            <Ionicons name="camera-reverse-outline" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.topGroup, styles.topGroupRight]}>
+          <TouchableOpacity
+            style={[styles.pill, timer > 0 && styles.btnActive]}
+            onPress={cycleTimer}
+            activeOpacity={0.8}
+            hitSlop={8}
+          >
+            <Ionicons
+              name="timer-outline"
+              size={16}
+              color={timer > 0 ? colors.accent : "#fff"}
+            />
+            <Text
+              style={[styles.pillLabel, timer > 0 && styles.pillLabelAccent]}
+            >
+              {timer === 0 ? "끔" : `${timer}초`}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.iconBtn, gridOn && styles.btnActive]}
+            onPress={() => setGridOn((g) => !g)}
+            activeOpacity={0.8}
+            hitSlop={8}
+          >
+            <Ionicons
+              name="grid-outline"
+              size={18}
+              color={gridOn ? colors.accent : "#fff"}
+            />
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
 
       {isRecording && (
@@ -428,6 +433,11 @@ export function MosaicCamera() {
       )}
 
       <SafeAreaView style={styles.controls} edges={["bottom"]}>
+        <LinearGradient
+          colors={["transparent", "rgba(8,4,16,0.55)", "rgba(8,4,16,0.85)"]}
+          style={styles.controlsBackdrop}
+          pointerEvents="none"
+        />
         {exclusions.length > 0 && (
           <TouchableOpacity
             style={styles.clearBtn}
@@ -437,7 +447,7 @@ export function MosaicCamera() {
             <Ionicons
               name="refresh"
               size={14}
-              color="#34D399"
+              color={colors.accent}
               style={{ marginRight: 5 }}
             />
             <Text style={styles.clearBtnText}>제외 영역 초기화</Text>
@@ -445,50 +455,64 @@ export function MosaicCamera() {
         )}
 
         <View style={styles.segment}>
-          {(["photo", "video"] as CameraMode[]).map((m) => (
-            <TouchableOpacity
-              key={m}
-              style={[
-                styles.segmentItem,
-                mode === m && styles.segmentItemActive,
-              ]}
-              onPress={() => {
-                if (!isRecording) setMode(m);
-              }}
-              disabled={isRecording}
-              activeOpacity={0.8}
-            >
+          {(["photo", "video"] as CameraMode[]).map((m) => {
+            const active = mode === m;
+            const label = (
               <Text
-                style={[
-                  styles.segmentText,
-                  mode === m && styles.segmentTextActive,
-                ]}
+                style={[styles.segmentText, active && styles.segmentTextActive]}
               >
                 {m === "photo" ? "사진" : "동영상"}
               </Text>
-            </TouchableOpacity>
-          ))}
+            );
+            return (
+              <TouchableOpacity
+                key={m}
+                onPress={() => {
+                  if (!isRecording) setMode(m);
+                }}
+                disabled={isRecording}
+                activeOpacity={0.8}
+              >
+                {active ? (
+                  <LinearGradient
+                    colors={gradient.brand}
+                    start={gradient.start}
+                    end={gradient.end}
+                    style={styles.segmentItem}
+                  >
+                    {label}
+                  </LinearGradient>
+                ) : (
+                  <View style={styles.segmentItem}>{label}</View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <View style={styles.shutterRow}>
           <TouchableOpacity
-            style={[
-              styles.shutter,
-              mode === "video" && styles.shutterVideo,
-              isRecording && styles.shutterRecording,
-            ]}
             onPress={handleShutter}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
+            style={mode === "photo" && styles.shutterShadow}
           >
-            {mode === "video" && isRecording ? (
-              <View style={styles.stopSquare} />
+            {mode === "photo" ? (
+              <LinearGradient
+                colors={gradient.brand}
+                start={gradient.start}
+                end={gradient.end}
+                style={styles.shutterRing}
+              >
+                <View style={styles.shutterCore} />
+              </LinearGradient>
             ) : (
-              <View
-                style={[
-                  styles.shutterInner,
-                  mode === "video" && styles.shutterInnerVideo,
-                ]}
-              />
+              <View style={styles.shutterRingVideo}>
+                {isRecording ? (
+                  <View style={styles.stopSquare} />
+                ) : (
+                  <View style={styles.shutterCoreVideo} />
+                )}
+              </View>
             )}
           </TouchableOpacity>
 
@@ -525,21 +549,17 @@ const styles = StyleSheet.create({
   topBar: {
     position: "absolute",
     top: 0,
+    left: 0,
     right: 0,
-    alignItems: "flex-end",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     paddingHorizontal: 16,
     paddingTop: 8,
-    gap: 10,
   },
-  helpBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  iconBtnActive: { borderWidth: 1, borderColor: "rgba(52,211,153,0.7)" },
+  topGroup: { alignItems: "flex-start", gap: 10 },
+  topGroupRight: { alignItems: "flex-end" },
+  btnActive: { borderColor: colors.accentBorder, backgroundColor: colors.accentSoft },
 
   gridV: {
     position: "absolute",
@@ -561,13 +581,15 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 8,
     borderWidth: 1.5,
-    borderColor: "#FFD60A",
+    borderColor: colors.accent,
   },
   zoomBadge: {
     position: "absolute",
     alignSelf: "center",
     bottom: 16,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: colors.glassStrong,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 16,
@@ -582,35 +604,31 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 96,
     fontWeight: "800",
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowRadius: 12,
+    textShadowColor: "rgba(236,72,153,0.7)",
+    textShadowRadius: 20,
   },
 
-  topBarLeft: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    alignItems: "flex-start",
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    gap: 10,
-  },
-  flashPill: {
+  pill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
     height: 36,
     paddingHorizontal: 12,
     borderRadius: 18,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: colors.glass,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
   },
-  flashLabel: { color: "#fff", fontSize: 13, fontWeight: "600" },
-  flashLabelOn: { color: "#FFD60A" },
+  pillLabel: { color: "#fff", fontSize: 13, fontWeight: "700" },
+  pillLabelFlash: { color: colors.flash },
+  pillLabelAccent: { color: colors.accent },
   iconBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: colors.glass,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -627,16 +645,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "rgba(0,0,0,0.55)",
+    backgroundColor: colors.glassStrong,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
   },
-  recDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#ff3b30" },
+  recDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.rec },
   recTime: {
     color: "#fff",
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
     fontVariant: ["tabular-nums"],
   },
 
@@ -646,8 +666,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingTop: 20,
-    backgroundColor: "rgba(0,0,0,0.35)",
   },
+  controlsBackdrop: { ...StyleSheet.absoluteFillObject },
 
   clearBtn: {
     flexDirection: "row",
@@ -656,42 +676,59 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "rgba(52,211,153,0.18)",
+    backgroundColor: colors.accentSoft,
     borderWidth: 1,
-    borderColor: "rgba(52,211,153,0.6)",
+    borderColor: colors.accentBorder,
   },
-  clearBtnText: { color: "#34D399", fontSize: 13, fontWeight: "600" },
+  clearBtnText: { color: colors.accent, fontSize: 13, fontWeight: "700" },
 
   segment: {
     flexDirection: "row",
     alignSelf: "center",
     marginBottom: 20,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: colors.glass,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
     borderRadius: 22,
     padding: 4,
   },
-  segmentItem: { paddingHorizontal: 22, paddingVertical: 7, borderRadius: 18 },
-  segmentItemActive: { backgroundColor: "#fff" },
-  segmentText: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 14,
-    fontWeight: "600",
+  segmentItem: {
+    paddingHorizontal: 22,
+    paddingVertical: 7,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  segmentTextActive: { color: "#000" },
+  segmentText: {
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  segmentTextActive: { color: "#fff" },
 
-  shutterRow: { alignItems: "center", paddingBottom: 36 },
+  shutterRow: { alignItems: "center", paddingBottom: 96 },
   helpBtnBottom: {
     position: "absolute",
     right: 28,
-    bottom: 56,
+    bottom: 116,
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: colors.glass,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
     justifyContent: "center",
     alignItems: "center",
   },
-  shutter: {
+  shutterShadow: {
+    borderRadius: 40,
+    shadowColor: colors.accent,
+    shadowOpacity: 0.6,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 12,
+  },
+  shutterRing: {
     width: 76,
     height: 76,
     borderRadius: 38,
@@ -700,19 +737,31 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  shutterVideo: { borderColor: "#ff3b30" },
-  shutterRecording: { borderColor: "#ff3b30" },
-  shutterInner: {
+  shutterCore: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#fff",
+  },
+  shutterRingVideo: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    borderWidth: 4,
+    borderColor: colors.rec,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  shutterCoreVideo: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#fff",
+    backgroundColor: colors.rec,
   },
-  shutterInnerVideo: { backgroundColor: "#ff3b30" },
   stopSquare: {
     width: 26,
     height: 26,
     borderRadius: 4,
-    backgroundColor: "#ff3b30",
+    backgroundColor: colors.rec,
   },
 });

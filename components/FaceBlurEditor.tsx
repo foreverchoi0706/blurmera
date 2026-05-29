@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Sharing from "expo-sharing";
 import { File, Paths } from "expo-file-system";
 import {
@@ -29,6 +30,8 @@ import {
   ImageFormat,
 } from "@shopify/react-native-skia";
 import { ExclusionLayer, type ExclusionRect } from "./ExclusionLayer";
+import { GradientButton } from "./ui/GradientButton";
+import { colors } from "@/constants/theme";
 
 const PAD = 0.15;
 
@@ -68,6 +71,7 @@ export function FaceBlurEditor({
   onClose,
   closeLabel = "다시 찍기",
 }: Props) {
+  const insets = useSafeAreaInsets();
   const canvasRef = useCanvasRef();
   const skImage = useImage(imageUri);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -241,6 +245,25 @@ export function FaceBlurEditor({
             <Text style={styles.loadingText}>얼굴 감지 중...</Text>
           </View>
         )}
+
+        {/* 사진 영역 위에 떠 있는 제외 초기화 */}
+        {!detecting && exclusions.length > 0 && (
+          <View style={styles.clearFloat} pointerEvents="box-none">
+            <TouchableOpacity
+              style={styles.clearBtn}
+              onPress={() => setExclusions([])}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name="refresh"
+                size={14}
+                color={colors.accent}
+                style={{ marginRight: 5 }}
+              />
+              <Text style={styles.clearBtnText}>제외 초기화</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       {!detecting && (
@@ -253,26 +276,20 @@ export function FaceBlurEditor({
         </Text>
       )}
 
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.btn} onPress={onClose}>
-          <Text style={styles.btnText}>{closeLabel}</Text>
-        </TouchableOpacity>
-        {!detecting && exclusions.length > 0 && (
-          <TouchableOpacity style={styles.btn} onPress={() => setExclusions([])}>
-            <Text style={styles.btnText}>제외 초기화</Text>
-          </TouchableOpacity>
-        )}
+      <View style={[styles.actions, { paddingBottom: insets.bottom + 90 }]}>
+        <GradientButton
+          label={closeLabel}
+          variant="glass"
+          onPress={onClose}
+          style={styles.flexBtn}
+        />
         {!detecting && (
-          <TouchableOpacity
-            style={[styles.btn, styles.btnPrimary]}
+          <GradientButton
+            label="공유 / 저장"
+            icon="share-outline"
             onPress={saveImage}
-            activeOpacity={0.85}
-          >
-            <Ionicons name="share-outline" size={18} color="#000" />
-            <Text style={[styles.btnText, styles.btnPrimaryText]}>
-              공유 / 저장
-            </Text>
-          </TouchableOpacity>
+            style={styles.flexBtn}
+          />
         )}
       </View>
     </View>
@@ -280,13 +297,15 @@ export function FaceBlurEditor({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0E0E0E" },
+  container: { flex: 1, backgroundColor: colors.bg },
   preview: {
     flex: 1,
     margin: 16,
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#1e1e1e",
+    backgroundColor: colors.bgSolid,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -295,31 +314,38 @@ const styles = StyleSheet.create({
   },
   loading: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: "rgba(8,4,16,0.6)",
     justifyContent: "center",
     alignItems: "center",
     gap: 12,
   },
-  loadingText: { color: "#fff", fontSize: 14 },
+  loadingText: { color: colors.text, fontSize: 14 },
   hint: {
-    color: "rgba(52,211,153,0.8)",
+    color: colors.accent,
     fontSize: 12,
+    fontWeight: "600",
     textAlign: "center",
     marginTop: -8,
     marginBottom: 8,
   },
-  actions: { flexDirection: "row", gap: 10, padding: 16, paddingTop: 8 },
-  btn: {
-    flex: 1,
-    flexDirection: "row",
-    gap: 6,
-    paddingVertical: 16,
-    borderRadius: 16,
-    backgroundColor: "#1E1E1E",
+  clearFloat: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 16,
     alignItems: "center",
-    justifyContent: "center",
   },
-  btnPrimary: { backgroundColor: "#ffffff" },
-  btnText: { color: "#fff", fontSize: 15, fontWeight: "600" },
-  btnPrimaryText: { color: "#000", fontWeight: "700" },
+  clearBtn: {
+    flexDirection: "row",
+    alignSelf: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: colors.accentSoft,
+    borderWidth: 1,
+    borderColor: colors.accentBorder,
+  },
+  clearBtnText: { color: colors.accent, fontSize: 13, fontWeight: "700" },
+  actions: { flexDirection: "row", gap: 10, padding: 16, paddingTop: 8 },
+  flexBtn: { flex: 1 },
 });

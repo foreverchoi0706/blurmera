@@ -1,6 +1,9 @@
 import React from 'react'
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Modal, StyleSheet, Text, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
+import { colors, glow, gradient } from '@/constants/theme'
+import { GradientButton } from './ui/GradientButton'
 
 interface Tip {
   icon: keyof typeof Ionicons.glyphMap
@@ -36,16 +39,21 @@ export default function OnboardingOverlay({ visible, onDismiss }: Props) {
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
       <View style={styles.backdrop}>
         <View style={styles.card}>
-          <View style={styles.iconCircle}>
-            <Ionicons name="sparkles" size={28} color="#34D399" />
-          </View>
+          <LinearGradient
+            colors={gradient.brand}
+            start={gradient.start}
+            end={gradient.end}
+            style={styles.iconCircle}
+          >
+            <Ionicons name="sparkles" size={28} color="#fff" />
+          </LinearGradient>
           <Text style={styles.heading}>이렇게 사용해요</Text>
 
           <View style={styles.tips}>
             {TIPS.map(tip => (
               <View key={tip.title} style={styles.tipRow}>
                 <View style={styles.tipIcon}>
-                  <Ionicons name={tip.icon} size={20} color="#34D399" />
+                  <Ionicons name={tip.icon} size={20} color={colors.accent} />
                 </View>
                 <View style={styles.tipText}>
                   <Text style={styles.tipTitle}>{tip.title}</Text>
@@ -55,9 +63,7 @@ export default function OnboardingOverlay({ visible, onDismiss }: Props) {
             ))}
           </View>
 
-          <TouchableOpacity style={styles.btn} onPress={onDismiss} activeOpacity={0.85}>
-            <Text style={styles.btnText}>시작하기</Text>
-          </TouchableOpacity>
+          <GradientButton label="시작하기" icon="arrow-forward" onPress={onDismiss} style={styles.cta} />
         </View>
       </View>
     </Modal>
@@ -67,7 +73,7 @@ export default function OnboardingOverlay({ visible, onDismiss }: Props) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.75)',
+    backgroundColor: 'rgba(8,4,16,0.82)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
@@ -75,8 +81,10 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 380,
-    backgroundColor: '#1A1A1A',
-    borderRadius: 24,
+    backgroundColor: colors.bgSolid,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
     padding: 24,
     gap: 8,
   },
@@ -84,15 +92,15 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: 'rgba(52,211,153,0.12)',
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
+    ...glow,
   },
   heading: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '700',
+    color: colors.text,
+    fontSize: 21,
+    fontWeight: '800',
     textAlign: 'center',
     marginTop: 4,
     marginBottom: 12,
@@ -103,19 +111,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: 'rgba(52,211,153,0.1)',
+    backgroundColor: colors.accentSoft,
     justifyContent: 'center',
     alignItems: 'center',
   },
   tipText: { flex: 1, gap: 2 },
-  tipTitle: { color: '#fff', fontSize: 15, fontWeight: '600' },
-  tipDesc: { color: '#9A9A9A', fontSize: 13, lineHeight: 19 },
-  btn: {
-    marginTop: 16,
-    paddingVertical: 16,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
-  btnText: { color: '#000', fontSize: 16, fontWeight: '700' },
+  tipTitle: { color: colors.text, fontSize: 15, fontWeight: '700' },
+  tipDesc: { color: colors.textDim, fontSize: 13, lineHeight: 19 },
+  cta: { marginTop: 16 },
 })
